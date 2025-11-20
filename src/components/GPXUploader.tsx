@@ -78,7 +78,8 @@ export default function GPXUploader({ onUploadComplete }: GPXUploaderProps) {
         .getPublicUrl(fileName);
 
       // Save route to database
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: authData } = await supabase.auth.getSession();
+      const user = authData?.session?.user;
       
       const { data: route, error: dbError } = await supabase
         .from('routes')

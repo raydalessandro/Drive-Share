@@ -52,9 +52,10 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Modern Vercel-inspired color palette
+        
+        // DRIVE SHARE - Colori Moto 🏍️
         vercel: {
-          // Deep blacks and grays
+          // Neri e grigi asfalto
           black: "#000000",
           "gray-900": "#0a0a0a",
           "gray-800": "#171717",
@@ -66,26 +67,40 @@ export default {
           "gray-200": "#d4d4d4",
           "gray-100": "#f5f5f5",
 
-          // Accent colors (updated purple shades)
-          blue: "#0070f3",
-          "blue-dark": "#0061d5",
-          purple: "#E2CBFF",        // ⬅️ new lavender
-          "purple-dark": "#4E2CA5", // ⬅️ deeper indigo
-          green: "#00d924",
-          "green-dark": "#00b01e",
-          orange: "#ff6600",
-          "orange-dark": "#e55a00",
-          red: "#ee0000",
+          // ROSSO MOTO (sostituisce purple)
+          purple: "#dc2626",        // ⬅️ ROSSO MOTO
+          "purple-dark": "#991b1b", // ⬅️ ROSSO SCURO
+          
+          // Altri colori Drive Share
+          blue: "#0ea5e9",          // Info/Links
+          "blue-dark": "#0284c7",
+          green: "#22c55e",         // Success
+          "green-dark": "#16a34a",
+          orange: "#f97316",        // Warning/Sunset rides
+          "orange-dark": "#ea580c",
+          red: "#ef4444",           // Danger/Primary
           "red-dark": "#dc2626",
 
-          // Special
           white: "#ffffff",
           "off-white": "#fafafa",
         },
-        // Keep existing goon colors for backward compatibility but update them
+        
+        // Colori Drive Share custom
+        moto: {
+          red: "#dc2626",
+          "red-light": "#ef4444",
+          "red-dark": "#991b1b",
+          black: "#000000",
+          asphalt: "#262626",
+          "road-line": "#fbbf24",
+          chrome: "#e5e7eb",
+          leather: "#7c2d12",
+        },
+        
+        // Override goon con colori moto
         goon: {
-          purple: "#E2CBFF",        // ⬅️ new lavender
-          "dark-purple": "#393BB2", // ⬅️ deeper indigo
+          purple: "#dc2626",        // ⬅️ ROSSO invece di purple
+          "dark-purple": "#991b1b", // ⬅️ ROSSO SCURO
           "deep-bg": "#000000",
           gray: "#737373",
           charcoal: "#262626",
@@ -93,11 +108,26 @@ export default {
           "dark-charcoal": "#171717",
         },
       },
+      
+      // Gradienti custom
+      backgroundImage: {
+        'gradient-speed': 'linear-gradient(135deg, #dc2626 0%, #000000 100%)',
+        'gradient-sunset': 'linear-gradient(135deg, #f97316 0%, #dc2626 50%, #7c2d12 100%)',
+        'gradient-chrome': 'linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%)',
+      },
+      
+      // Ombre rosse
+      boxShadow: {
+        'moto': '0 10px 40px rgba(220, 38, 38, 0.2)',
+        'moto-lg': '0 20px 60px rgba(220, 38, 38, 0.3)',
+      },
+      
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -115,12 +145,25 @@ export default {
           "0%": { opacity: "1", transform: "translateY(0)" },
           "100%": { opacity: "0", transform: "translateY(10px)" },
         },
+        // Animazioni moto
+        "speed-lines": {
+          "0%": { transform: "translateX(-100%)", opacity: "0" },
+          "50%": { opacity: "1" },
+          "100%": { transform: "translateX(100%)", opacity: "0" },
+        },
+        "rev-engine": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.05)" },
+        },
       },
+      
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "fade-out": "fade-out 0.3s ease-out",
+        "speed": "speed-lines 2s ease-in-out infinite",
+        "rev": "rev-engine 0.3s ease-in-out",
       },
     },
   },

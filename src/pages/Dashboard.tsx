@@ -18,10 +18,9 @@ import {
   Navigation,
   Plus,
   Gauge,
-  Road,
-  Sunrise,
-  Mountain,
-  Fuel,
+  MapPin,
+  Sun,
+  Activity,
   Timer
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";

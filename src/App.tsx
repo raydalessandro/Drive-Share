@@ -123,6 +123,9 @@ const App = () => (
           
           {/* Catch all */}
           <Route path="*" element={<NotFound />} />
+
+          <Route path="/routes" element={<ProtectedRoute><Routes /></ProtectedRoute>} />
+          
         </Routes>
         <Toaster />
         <SonnerToaster />

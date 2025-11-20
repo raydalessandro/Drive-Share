@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Map, Upload, Download } from 'lucide-react';
 
-export default function Routes() {
+export default function RoutesPage() {
   const [routes, setRoutes] = useState<any[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<any>(null);

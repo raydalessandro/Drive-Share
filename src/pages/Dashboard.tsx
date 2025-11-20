@@ -1,298 +1,325 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import { useFriendsStore } from "@/stores/friendsStore";
+import { supabase } from '@/integrations/supabase/client';
 import MainLayout from "@/components/layout/MainLayout";
 import { Avatar } from "@/components/avatar";
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Calendar, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Map, 
+  Users, 
+  Calendar, 
+  ArrowRight, 
+  TrendingUp, 
+  Heart, 
+  MessageCircle, 
+  Share2,
+  Navigation,
+  Plus
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { SlidingNumber } from "@/components/animate-ui/text/sliding-number";
-import { FireworksBackground } from "@/components/animate-ui/backgrounds/fireworks";
-
-const FIREWORKS_FADE_IN_DURATION = 500;   // ms
-const FIREWORKS_ACTIVE_DURATION = 6000;  // ms
-const FIREWORKS_FADE_OUT_DURATION = 1000; // ms
 
 const Dashboard = () => {
-  console.log("🔄 [DASHBOARD] Rendering Dashboard component");
-
-  const profile           = useAuthStore((s) => s.profile);
-  const isFetchingProfile = useAuthStore((s) => s.isFetchingProfile);
-  const isAuthenticated   = useAuthStore((s) => s.isAuthenticated);
-  const updateWeeklyCount = useAuthStore((s) => s.updateWeeklyCount);
-
-  const refreshFriends = useFriendsStore((s) => s.refreshFriends);
-  const friends        = useFriendsStore((s) => s.friends);
-  const friendsLoading = useFriendsStore((s) => s.loading);
-
+  const profile = useAuthStore((s) => s.profile);
   const navigate = useNavigate();
-
-  const [isConfirming, setIsConfirming]               = useState(false);
-  const [error, setError]                             = useState<string | null>(null);
-  const [hasFetchedFriendsInitial, setHasFetchedFriendsInitial] = useState(false);
-
-  const [renderFireworksComponent, setRenderFireworksComponent] = useState(false);
-  const [fireworksAreVisible, setFireworksAreVisible]           = useState(false);
-
-  // ... (useEffect hooks and other logic remain the same) ...
-  useEffect(() => {
-    console.log("🔄 [DASHBOARD] Component mounted with auth state:", {
-      isAuthenticated,
-      isFetchingProfile,
-      hasProfile: !!profile,
-    });
-    return () => console.log("🔄 [DASHBOARD] Component unmounting");
-  }, [isAuthenticated, isFetchingProfile, profile]);
+  
+  const [publicPosts, setPublicPosts] = useState<any[]>([]);
+  const [monthlyKm, setMonthlyKm] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("🔄 [DASHBOARD] Effect triggered by state change:", {
-      hasProfile: !!profile,
-      isFetchingProfile,
-      isAuthenticated,
-      friendsCount: friends.length,
-      hasFetchedFriendsInitial,
-    });
-
-    if (profile && !isFetchingProfile && !hasFetchedFriendsInitial && !friendsLoading) {
-      console.log("👥 [DASHBOARD] Profile ready, attempting initial friends data load.");
-      setHasFetchedFriendsInitial(true);
-      refreshFriends().catch((err) => {
-        console.error("👥 [DASHBOARD] Error loading initial friends:", err);
-        setError("Failed to load friends data.");
-      });
+    if (profile) {
+      loadDashboardData();
     }
-  }, [
-    profile,
-    isFetchingProfile,
-    isAuthenticated,
-    friends.length,
-    refreshFriends,
-    hasFetchedFriendsInitial,
-    friendsLoading,
-  ]);
+  }, [profile]);
 
-  useEffect(() => {
-    let fadeInTimer: NodeJS.Timeout;
-    let fadeOutTimer: NodeJS.Timeout;
-    let unmountTimer: NodeJS.Timeout;
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Carica feed pubblico
+      const { data: posts } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles:author_id (username, display_name, avatar_url),
+          routes:route_id (title, description, distance_km)
+        `)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (posts) setPublicPosts(posts);
 
-    if (renderFireworksComponent) {
-      fadeInTimer = setTimeout(() => setFireworksAreVisible(true), 50);
-
-      fadeOutTimer = setTimeout(
-        () => setFireworksAreVisible(false),
-        FIREWORKS_ACTIVE_DURATION + 50,
-      );
-
-      unmountTimer = setTimeout(
-        () => setRenderFireworksComponent(false),
-        FIREWORKS_ACTIVE_DURATION + FIREWORKS_FADE_OUT_DURATION + 50,
-      );
-    } else {
-      setFireworksAreVisible(false);
-    }
-
-    return () => {
-      clearTimeout(fadeInTimer);
-      clearTimeout(fadeOutTimer);
-      clearTimeout(unmountTimer);
-    };
-  }, [renderFireworksComponent]);
-
-  if (!profile) {
-    console.error(
-      "❌ [DASHBOARD] Critical: Profile is null. This shouldn't happen if MainLayout/ProtectedRoute are working.",
-    );
-    return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-96">
-          <p className="text-lg text-destructive">Error: User profile not available.</p>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <MainLayout>
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <p className="text-lg text-destructive">Error loading dashboard</p>
-          <p className="text-muted-foreground">{error}</p>
-          <Button
-            onClick={() => {
-              setError(null);
-              setHasFetchedFriendsInitial(false);
-            }}
-          >
-            Try Again
-          </Button>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  const handleRelapseClick = async () => {
-    if (isConfirming) {
-      setIsConfirming(false);
-      try {
-        await updateWeeklyCount(); 
-        setFireworksAreVisible(false);
-        setRenderFireworksComponent(true);
-      } catch (err) {
-        console.error("🔄 [DASHBOARD] Error during relapse update:", err);
+      // Calcola KM del mese (per ora mock)
+      const currentMonth = new Date().getMonth();
+      const { data: myRoutes } = await supabase
+        .from('routes')
+        .select('distance_km')
+        .eq('user_id', profile?.id);
+      
+      if (myRoutes) {
+        const totalKm = myRoutes.reduce((acc, route) => 
+          acc + (route.distance_km || 0), 0
+        );
+        setMonthlyKm(Math.round(totalKm));
       }
-    } else {
-      setIsConfirming(true);
-      setTimeout(() => setIsConfirming(false), 3000);
+      
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const topFriends = [...friends]
-    .sort((a, b) => a.weeklyCount - b.weeklyCount)
-    .slice(0, 3);
+  const handleLikePost = async (postId: string) => {
+    // TODO: implementare like
+    console.log('Like post:', postId);
+  };
 
-  const streakDays    = profile.streakDays || 0;
-  const maxStreakDays = 30;
-
-  console.log("🔄 [DASHBOARD] Rendering main dashboard UI with profile:", profile.username);
+  if (!profile) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-96">
+          <p className="text-lg">Loading...</p>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
-      {renderFireworksComponent && (
-        <FireworksBackground
-          className={cn(
-            "fixed inset-0 z-[100] transition-opacity ease-in-out",
-            fireworksAreVisible ? "opacity-100" : "opacity-0",
-          )}
-          style={{
-            transitionDuration: fireworksAreVisible
-              ? `${FIREWORKS_FADE_IN_DURATION}ms`
-              : `${FIREWORKS_FADE_OUT_DURATION}ms`,
-          }}
-          population={2}
-          particleSpeed={{ min: 1, max: 8 }}
-          fireworkSpeed={{ min: 4, max: 9 }}
-          color={["#a855f7", "#ec4899", "#f97316", "#84cc16"]}
-        />
-      )}
-
-      <div className="space-y-8 animate-fade-in">
-        {/* HEADER */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">Track your progress and stay accountable.</p>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <Avatar
-              src={profile.avatarUrl}
-              fallback={profile.username}
-              size={48}
-              className="border-2 border-vercel-purple/30"
-            />
-            <div className="hidden sm:block text-right">
-              <p className="font-medium">{profile.username}</p>
-              <p className="text-sm text-muted-foreground">{streakDays} day streak</p>
+      <div className="space-y-6">
+        {/* HEADER HERO */}
+        <div className="bg-gradient-to-r from-vercel-purple to-vercel-pink p-6 rounded-lg text-white">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                Ciao {profile.displayName || profile.username}! 🏍️
+              </h1>
+              <p className="opacity-90">
+                Pronti per il prossimo giro? Scopri nuovi percorsi dalla community.
+              </p>
             </div>
+            <Button 
+              size="lg" 
+              variant="secondary"
+              onClick={() => navigate('/routes')}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Carica GPX
+            </Button>
           </div>
         </div>
 
-        {/* WEEKLY COUNT CARD */}
-        <Card className="vercel-card">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-6">
-              {/* MODIFIED PARENT DIV FOR H2 AND SLIDINGNUMBER */}
-              <div className="flex flex-col items-center space-y-2">
-                <h2 className="text-xl font-medium">This Week's Count</h2>
-                <SlidingNumber
-                  key={profile.weeklyCount}
-                  number={profile.weeklyCount}
-                  // MODIFIED CLASSNAME FOR SLIDINGNUMBER
-                  className="text-4xl font-bold text-vercel-purple text-center"
-                  transition={{ stiffness: 200, damping: 20, mass: 0.4 }}
-                />
+        {/* STATS CARDS */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">KM questo mese</p>
+                  <p className="text-2xl font-bold">{monthlyKm}</p>
+                </div>
+                <Navigation className="h-8 w-8 text-vercel-purple opacity-20" />
               </div>
-
-              <Button
-                size="lg"
-                variant={isConfirming ? "destructive" : "outline"}
-                className="w-full py-6 text-lg transition-all"
-                onClick={handleRelapseClick}
-              >
-                {isConfirming ? "Confirm Relapse" : "I Relapsed"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* STREAK + LEADERBOARD */}
-        {/* ... (rest of the component remains the same) ... */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="vercel-card">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <Calendar className="h-5 w-5 mr-2" /> Current Streak
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Days Clean</span>
-                <span className="font-medium">{streakDays} days</span>
-              </div>
-              <Progress value={(streakDays / maxStreakDays) * 100} className="h-2" />
             </CardContent>
           </Card>
 
-          <Card className="vercel-card">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Leaderboard</CardTitle>
-              <Button
-                variant="ghost"
-                className="text-vercel-purple hover:text-vercel-purple/80"
-                onClick={() => navigate("/leaderboard")}
-              >
-                View All <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </CardHeader>
-
-            <CardContent>
-              {friendsLoading && !friends.length && (
-                <div className="text-center text-muted-foreground py-2">
-                  Loading friends...
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Percorsi</p>
+                  <p className="text-2xl font-bold">7</p>
                 </div>
-              )}
+                <Map className="h-8 w-8 text-vercel-purple opacity-20" />
+              </div>
+            </CardContent>
+          </Card>
 
-              {!friendsLoading && topFriends.length === 0 && friends.length === 0 && (
-                <div className="text-center text-muted-foreground py-2">
-                  Add friends to see the leaderboard
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Amici</p>
+                  <p className="text-2xl font-bold">24</p>
                 </div>
-              )}
+                <Users className="h-8 w-8 text-vercel-purple opacity-20" />
+              </div>
+            </CardContent>
+          </Card>
 
-              {topFriends.length > 0 && (
-                <div className="space-y-3">
-                  {topFriends.map((friend, index) => (
-                    <div key={friend.id} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-muted-foreground font-medium w-4">{index + 1}.</span>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Eventi</p>
+                  <p className="text-2xl font-bold">3</p>
+                </div>
+                <Calendar className="h-8 w-8 text-vercel-purple opacity-20" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* FEED E SIDEBAR */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* FEED PRINCIPALE */}
+          <div className="md:col-span-2 space-y-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Ultimi percorsi condivisi</CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/explore')}>
+                  Vedi tutti <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {loading ? (
+                  <p className="text-center text-muted-foreground py-4">
+                    Caricamento...
+                  </p>
+                ) : publicPosts.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-4">
+                    Nessun percorso condiviso ancora
+                  </p>
+                ) : (
+                  publicPosts.map((post) => (
+                    <div key={post.id} className="border rounded-lg p-4">
+                      {/* Post header */}
+                      <div className="flex items-center gap-3 mb-3">
                         <Avatar
-                          src={friend.avatarUrl}
-                          fallback={friend.username}
-                          size={32}
+                          src={post.profiles?.avatar_url}
+                          fallback={post.profiles?.username?.[0] || 'U'}
+                          size={40}
                         />
-                        <span className="font-medium">{friend.username}</span>
+                        <div className="flex-1">
+                          <p className="font-semibold">
+                            {post.profiles?.display_name || post.profiles?.username}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(post.created_at).toLocaleDateString('it-IT')}
+                          </p>
+                        </div>
                       </div>
-                      <span className="font-medium text-vercel-purple">{friend.weeklyCount}</span>
+
+                      {/* Post content */}
+                      <p className="text-sm mb-3">{post.content}</p>
+
+                      {/* Route details if present */}
+                      {post.routes && (
+                        <div className="bg-muted rounded-lg p-3 mb-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-semibold text-sm">
+                                {post.routes.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {post.routes.distance_km?.toFixed(1)} km
+                              </p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              <Map className="h-4 w-4 mr-1" />
+                              Vedi
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Post actions */}
+                      <div className="flex gap-4 pt-3 border-t">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleLikePost(post.id)}
+                        >
+                          <Heart className="h-4 w-4 mr-1" />
+                          {post.likes || 0}
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          Commenta
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Share2 className="h-4 w-4 mr-1" />
+                          Condividi
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* SIDEBAR */}
+          <div className="space-y-4">
+            {/* Prossimi eventi */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Prossimi eventi</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium text-sm">Raduno Lago di Garda</p>
+                      <p className="text-xs text-muted-foreground">Dom 15 Dic • 23 riders</p>
+                    </div>
+                    <Badge variant="secondary">In 3gg</Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium text-sm">Tour Dolomiti</p>
+                      <p className="text-xs text-muted-foreground">Sab 21 Dic • 15 riders</p>
+                    </div>
+                    <Badge variant="secondary">In 1 sett</Badge>
+                  </div>
+                </div>
+                
+                <Button variant="outline" className="w-full" size="sm">
+                  Vedi tutti gli eventi
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Top Riders */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Top Riders del mese</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { name: 'Marco R.', km: 1250 },
+                    { name: 'Laura B.', km: 980 },
+                    { name: 'Giuseppe M.', km: 875 }
+                  ].map((rider, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-muted-foreground">
+                          {i + 1}.
+                        </span>
+                        <span className="text-sm font-medium">{rider.name}</span>
+                      </div>
+                      <Badge variant="outline">{rider.km} km</Badge>
                     </div>
                   ))}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-3" 
+                  size="sm"
+                  onClick={() => navigate('/leaderboard')}
+                >
+                  Classifica completa
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </MainLayout>

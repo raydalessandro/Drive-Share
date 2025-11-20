@@ -73,7 +73,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       icon: <Users className="h-5 w-5" />, 
       label: "Amici Riders", 
       path: "/friends",
-      badge: profile?.friendRequests?.length || null
+      badge: null
     },
     { 
       icon: <User className="h-5 w-5" />, 

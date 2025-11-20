@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -12,7 +11,8 @@ import {
   List,
   User,
   LogOut,
-  RefreshCcw
+  RefreshCcw,
+  Map
 } from "lucide-react";
 
 interface MainLayoutProps {
@@ -55,6 +55,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const navItems = [
     { icon: <LayoutDashboard className="h-5 w-5" />, label: "Dashboard", path: "/dashboard" },
     { icon: <List className="h-5 w-5" />, label: "Leaderboard", path: "/leaderboard" },
+    { icon: <Map className="h-5 w-5" />, label: "Percorsi", path: "/routes" },
     { icon: <Users className="h-5 w-5" />, label: "Friends", path: "/friends" },
     { icon: <User className="h-5 w-5" />, label: "Profile", path: "/profile" },
   ];
@@ -130,7 +131,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {/* Sidebar for desktop */}
       <div className="hidden md:flex w-64 flex-col bg-vercel-gray-900 border-r border-vercel-gray-800">
         <div className="flex items-center justify-center h-16 border-b border-vercel-gray-800">
-          <h1 className="text-xl font-bold text-gradient">SupaSocial</h1>
+          <h1 className="text-xl font-bold text-gradient">🏍️ Drive Share</h1>
         </div>
         <div className="flex flex-col flex-grow p-4 space-y-2">
           {navItems.map((item) => (

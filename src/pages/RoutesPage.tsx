@@ -19,10 +19,7 @@ export default function RoutesPage() {
   const loadRoutes = async () => {
     const { data } = await supabase
       .from('routes')
-      .select(`
-        *,
-        profiles:user_id (username, display_name)
-      `)
+      .select('*, profiles:user_id (username, display_name)')
       .order('created_at', { ascending: false });
     
     if (data) setRoutes(data);
@@ -84,7 +81,7 @@ export default function RoutesPage() {
               <CardContent>
                 <p className="text-sm mb-2">{route.description}</p>
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>📏 {route.distance_km?.toFixed(1) || 0} km</span>
+                  <span>KM {route.distance_km?.toFixed(1) || 0}</span>
                   <Button size="sm" variant="ghost">
                     <Download className="h-4 w-4" />
                   </Button>
@@ -101,64 +98,5 @@ export default function RoutesPage() {
         </div>
       </div>
     </MainLayout>
-  );
-}        <Button onClick={() => setShowUpload(!showUpload)}>
-          <Upload className="mr-2 h-4 w-4" />
-          Carica GPX
-        </Button>
-      </div>
-
-      {showUpload && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Nuovo Percorso</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <GPXUploader onUploadComplete={(route) => {
-              setRoutes([route, ...routes]);
-              setShowUpload(false);
-            }} />
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Mappa Percorsi</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <MapView
-            routes={selectedRoute ? [selectedRoute] : routes}
-            height="500px"
-          />
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {routes.map((route) => (
-          <Card 
-            key={route.id}
-            className="cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => setSelectedRoute(route)}
-          >
-            <CardHeader>
-              <CardTitle className="text-lg">{route.title}</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                di {route.profiles?.display_name || 'Anonimo'}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm mb-2">{route.description}</p>
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>📏 {route.distance_km?.toFixed(1) || 0} km</span>
-                <Button size="sm" variant="ghost">
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
   );
 }

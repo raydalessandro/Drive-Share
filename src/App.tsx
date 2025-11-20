@@ -121,13 +121,13 @@ const App = () => (
             } 
           />
           <Route 
-            path="/routes" 
-            element={
-              <ProtectedRoute path="/routes">
-                <RoutesPage />
-              </ProtectedRoute>
-            } 
-          />
+  path="/routes" 
+  element={
+    <ProtectedRoute path="/routes">
+      <RoutesPage />  {/* RoutesPage ha già MainLayout dentro */}
+    </ProtectedRoute>
+  } 
+/>
           
           {/* Catch all - DEVE ESSERE L'ULTIMA! */}
           <Route path="*" element={<NotFound />} />

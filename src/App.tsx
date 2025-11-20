@@ -15,7 +15,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Friends from "./pages/Friends";
 import Profile from "./pages/Profile";
 import FriendProfile from "./pages/FriendProfile";
-import Routes from './pages/Routes';
+import RoutesPage from './pages/RoutesPage';
 import NotFound from "./pages/NotFound";
 
 // Auth-protected route
@@ -124,7 +124,7 @@ const App = () => (
             path="/routes" 
             element={
               <ProtectedRoute path="/routes">
-                <Routes />
+                <RoutesPage />
               </ProtectedRoute>
             } 
           />

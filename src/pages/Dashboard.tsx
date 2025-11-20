@@ -115,8 +115,8 @@ const Dashboard = () => {
               <div className="space-y-4">
                 <div>
                   <h1 className="text-4xl font-bold text-white mb-2">
-                    Pronti a partire, {profile.displayName || profile.username}?
-                  </h1>
+  Pronti a partire, {profile?.username}?
+</h1>
                   <p className="text-xl text-white/90">
                     {weather.condition} • {weather.temp}°C • Perfetto per un giro! 🏍️
                   </p>

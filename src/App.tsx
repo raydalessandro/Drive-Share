@@ -120,13 +120,19 @@ const App = () => (
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/routes" 
+            element={
+              <ProtectedRoute path="/routes">
+                <Routes />
+              </ProtectedRoute>
+            } 
+          />
           
-          {/* Catch all */}
+          {/* Catch all - DEVE ESSERE L'ULTIMA! */}
           <Route path="*" element={<NotFound />} />
-
-          <Route path="/routes" element={<ProtectedRoute><Routes /></ProtectedRoute>} />
-          
         </Routes>
+        
         <Toaster />
         <SonnerToaster />
       </BrowserRouter>

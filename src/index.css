@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Drive Share - Colori Moto */
+    --background: 0 0% 5%; /* Nero profondo */
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Rosso moto come primary */
+    --primary: 0 84% 60%; /* Rosso */
+    --primary-foreground: 0 0% 100%;
+
+    /* Grigi asfalto */
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 0 84% 50%; /* Rosso più scuro */
+    --accent-foreground: 0 0% 98%;
+
+    /* Rosso per azioni distruttive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Bordi e input */
+    --border: 0 0% 20%;
+    --input: 0 0% 15%;
+    --ring: 0 84% 60%; /* Rosso focus */
+
+    --radius: 0.5rem;
+    
+    /* Colori custom Drive Share */
+    --moto-red: 0 84% 60%;
+    --moto-black: 0 0% 5%;
+    --moto-gray: 0 0% 20%;
+    --asphalt: 0 0% 25%;
+    --road-yellow: 45 93% 47%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-black text-foreground antialiased;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(239, 68, 68, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.05) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+  
+  html {
+    @apply scroll-smooth;
+  }
+}
+
+@layer utilities {
+  /* Drive Share glass morphism */
+  .glass-morphism {
+    @apply backdrop-blur-xl bg-red-950/10 border border-red-900/20 shadow-[0_8px_32px_-12px_rgba(239,68,68,0.3)];
+  }
+  
+  .neo-blur {
+    @apply backdrop-blur-2xl bg-black/60 border border-red-900/20;
+  }
+  
+  /* Gradiente rosso moto */
+  .text-gradient {
+    @apply bg-gradient-to-br from-red-600 via-red-500 to-orange-500 bg-clip-text text-transparent;
+  }
+  
+  /* Gradiente velocità */
+  .gradient-speed {
+    @apply bg-gradient-to-r from-red-600 via-red-500 to-zinc-900;
+  }
+
+  /* Card stile Drive Share */
+  .vercel-card {
+    @apply bg-zinc-900/50 border border-red-900/20 rounded-lg p-6 shadow-lg;
+    @apply hover:border-red-600/40 hover:shadow-[0_10px_40px_rgba(239,68,68,0.15)] transition-all duration-300;
+  }
+  
+  /* Bottoni moto */
+  .vercel-button {
+    @apply bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800;
+    @apply border border-red-600 hover:border-red-500 text-white;
+    @apply transition-all duration-200 transform hover:scale-105;
+    @apply shadow-[0_4px_14px_0_rgb(239,68,68,0.3)] hover:shadow-[0_6px_20px_0_rgb(239,68,68,0.4)];
+  }
+  
+  /* Input moto */
+  .vercel-input {
+    @apply bg-zinc-900/80 border border-red-900/30 focus:border-red-600/50;
+    @apply text-white placeholder:text-zinc-500;
+    @apply focus:shadow-[0_0_0_1px_rgba(239,68,68,0.2)];
+  }
+  
+  /* KM badge */
+  .km-badge {
+    @apply bg-gradient-to-r from-red-600 to-red-700 text-white;
+    @apply px-3 py-1 rounded-full text-sm font-bold;
+    @apply shadow-[0_2px_10px_rgba(239,68,68,0.3)];
+  }
+  
+  /* Animazione velocità */
+  @keyframes speed {
+    from {
+      transform: translateX(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .animate-speed {
+    animation: speed 0.5s ease-out;
+  }
+  
+  /* Override colori Vercel con colori moto */
+  .bg-vercel-black { @apply bg-black !important; }
+  .bg-vercel-gray-900 { @apply bg-zinc-900 !important; }
+  .bg-vercel-gray-800 { @apply bg-zinc-800 !important; }
+  .bg-vercel-gray-700 { @apply bg-zinc-700 !important; }
+  .border-vercel-gray-800 { @apply border-zinc-800 !important; }
+  .border-vercel-gray-700 { @apply border-zinc-700 !important; }
+  .text-vercel-purple { @apply text-red-600 !important; }
+  .bg-vercel-purple { @apply bg-red-600 !important; }
+  .border-vercel-purple { @apply border-red-600 !important; }
+  
+  /* Hover states moto */
+  .hover\:bg-vercel-gray-800:hover { @apply bg-zinc-800/80 !important; }
+  .hover\:border-vercel-gray-700:hover { @apply border-red-900/40 !important; }
+  
+  /* Stati attivi */
+  .bg-vercel-purple\/20 { @apply bg-red-600/20 !important; }
+  .bg-vercel-purple\/30 { @apply bg-red-600/30 !important; }
+  .hover\:bg-vercel-purple\/30:hover { @apply bg-red-600/30 !important; }
+  .border-vercel-purple\/30 { @apply border-red-600/30 !important; }
+  
+  /* Scrollbar personalizzata */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-zinc-900;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-red-600/50 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-red-600;
+  }
+  
+  /* Selection */
+  ::selection {
+    @apply bg-red-600 text-white;
+  }
+    }

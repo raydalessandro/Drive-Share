@@ -71,7 +71,14 @@ const Profile = () => {
 
   // Handle motorcycle photo change
   const handleMotorcyclePhotoChange = async (photoUrl: string | null) => {
-    await updateMotorcycle(motorcycleName, photoUrl);
+    try {
+      await updateMotorcycle(motorcycleName || '', photoUrl);
+      // Reload to ensure state is in sync
+      await loadMotorcycle();
+    } catch (error) {
+      // Error already handled in store
+      console.error('Error updating photo:', error);
+    }
   };
 
   // Handle motorcycle name save

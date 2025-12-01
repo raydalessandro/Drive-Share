@@ -72,9 +72,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       badge: null
     },
     { 
-      icon: <Users className="h-5 w-5" />, 
-      label: "Amici Riders", 
-      path: "/friends",
+      icon: <Navigation className="h-5 w-5" />, 
+      label: "Tracking", 
+      path: "/tracking",
       badge: null
     },
     { 

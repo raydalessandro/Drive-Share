@@ -71,14 +71,40 @@ export function MotorcyclePhoto({
     try {
       // Delete old photo if exists
       if (photoUrl) {
-        const oldPath = photoUrl.startsWith('http') 
-          ? photoUrl.split('/').slice(-2).join('/')
-          : photoUrl;
-        await supabase.storage.from('motorcycles').remove([oldPath]);
+        try {
+          // Extract path from URL - handle both full URLs and paths
+          let oldPath = photoUrl;
+          if (photoUrl.startsWith('http')) {
+            // Extract path from Supabase storage URL
+            // URL format: https://[project].supabase.co/storage/v1/object/public/motorcycles/[path]
+            const urlParts = photoUrl.split('/motorcycles/');
+            if (urlParts.length > 1) {
+              oldPath = urlParts[1];
+            } else {
+              // Fallback: try to extract from end of URL
+              const pathParts = photoUrl.split('/').slice(-2);
+              oldPath = pathParts.join('/');
+            }
+          }
+          
+          if (oldPath && oldPath !== photoUrl) {
+            const { error: deleteError } = await supabase.storage
+              .from('motorcycles')
+              .remove([oldPath]);
+            
+            if (deleteError) {
+              console.warn('Error deleting old photo:', deleteError);
+              // Continue anyway - not critical
+            }
+          }
+        } catch (deleteErr) {
+          console.warn('Error during old photo cleanup:', deleteErr);
+          // Continue anyway
+        }
       }
 
       // Upload new photo
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       
       const { data, error } = await supabase.storage
@@ -121,17 +147,35 @@ export function MotorcyclePhoto({
     if (!photoUrl || !user) return;
 
     try {
-      const path = photoUrl.split('/').slice(-2).join('/');
-      await supabase.storage.from('motorcycles').remove([path]);
+      // Extract path from URL
+      let path = photoUrl;
+      if (photoUrl.startsWith('http')) {
+        const urlParts = photoUrl.split('/motorcycles/');
+        if (urlParts.length > 1) {
+          path = urlParts[1];
+        } else {
+          // Fallback
+          const pathParts = photoUrl.split('/').slice(-2);
+          path = pathParts.join('/');
+        }
+      }
+      
+      const { error } = await supabase.storage
+        .from('motorcycles')
+        .remove([path]);
+      
+      if (error) throw error;
+      
       onPhotoChange(null);
       toast({
         title: "Foto rimossa",
         description: "La foto è stata eliminata",
       });
     } catch (error: any) {
+      console.error('Error removing photo:', error);
       toast({
         title: "Errore",
-        description: "Errore nella rimozione",
+        description: error.message || "Errore nella rimozione",
         variant: "destructive",
       });
     }
@@ -201,4 +245,6 @@ export function MotorcyclePhoto({
     </div>
   );
 }
+
+
 

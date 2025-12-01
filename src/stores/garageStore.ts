@@ -68,18 +68,26 @@ export const useGarageStore = create<GarageState & GarageActions>((set, get) => 
 
   updateMotorcycle: async (name: string, photoUrl: string | null) => {
     const user = useAuthStore.getState().user;
-    if (!user) return;
+    if (!user) {
+      toast({
+        title: 'Errore',
+        description: 'Utente non autenticato',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     set({ loading: true });
     try {
       const existing = get().motorcycle;
+      const nameToSave = name.trim() || null; // Allow null name
 
       if (existing) {
         // Update existing
         const { data, error } = await supabase
           .from('motorcycles')
           .update({
-            name,
+            name: nameToSave,
             photo_url: photoUrl,
             updated_at: new Date().toISOString(),
           })
@@ -95,7 +103,7 @@ export const useGarageStore = create<GarageState & GarageActions>((set, get) => 
           .from('motorcycles')
           .insert({
             user_id: user.id,
-            name,
+            name: nameToSave,
             photo_url: photoUrl,
           })
           .select()
@@ -107,7 +115,7 @@ export const useGarageStore = create<GarageState & GarageActions>((set, get) => 
 
       toast({
         title: 'Successo!',
-        description: 'Dati moto aggiornati',
+        description: photoUrl ? 'Foto moto aggiornata' : 'Dati moto aggiornati',
       });
     } catch (error: any) {
       console.error('Error updating motorcycle:', error);
@@ -116,6 +124,7 @@ export const useGarageStore = create<GarageState & GarageActions>((set, get) => 
         description: error.message || 'Errore nel salvataggio',
         variant: 'destructive',
       });
+      throw error; // Re-throw so caller can handle
     } finally {
       set({ loading: false });
     }
@@ -282,4 +291,6 @@ export const useGarageStore = create<GarageState & GarageActions>((set, get) => 
     }
   },
 }));
+
+
 

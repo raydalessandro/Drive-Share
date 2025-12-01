@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Garage from "./pages/Garage";
 import Feed from "./pages/Feed";
-import Friends from "./pages/Friends";
+import Tracking from "./pages/Tracking";
 import Profile from "./pages/Profile";
 import FriendProfile from "./pages/FriendProfile";
 import RoutesPage from './pages/RoutesPage';
@@ -97,10 +97,10 @@ const App = () => (
             } 
           />
           <Route 
-            path="/friends" 
+            path="/tracking" 
             element={
-              <ProtectedRoute path="/friends">
-                <Friends />
+              <ProtectedRoute path="/tracking">
+                <Tracking />
               </ProtectedRoute>
             } 
           />

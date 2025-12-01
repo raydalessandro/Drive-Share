@@ -44,8 +44,15 @@ const Garage = () => {
   }, [profile, loadMotorcycle, loadExpirations, loadMaintenances]);
 
   const handlePhotoChange = async (photoUrl: string | null) => {
-    const currentName = motorcycle?.name || '';
-    await useGarageStore.getState().updateMotorcycle(currentName, photoUrl);
+    try {
+      const currentName = motorcycle?.name || '';
+      await useGarageStore.getState().updateMotorcycle(currentName, photoUrl);
+      // Reload to ensure state is in sync
+      await useGarageStore.getState().loadMotorcycle();
+    } catch (error) {
+      // Error already handled in store
+      console.error('Error updating photo:', error);
+    }
   };
 
   const handleAddExpiration = () => {

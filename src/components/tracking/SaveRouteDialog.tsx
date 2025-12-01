@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Download } from 'lucide-react';
 import { useTrackingStore, TrackedRoute } from '@/stores/trackingStore';
+import MapView from '@/components/MapView';
 
 interface SaveRouteDialogProps {
   open: boolean;
@@ -74,14 +75,44 @@ export function SaveRouteDialog({ open, onClose, onSaved }: SaveRouteDialogProps
     URL.revokeObjectURL(url);
   };
 
+  // Prepare map route for preview
+  const mapRoute = points.length > 0 ? [{
+    id: 'preview-track',
+    title: title || 'Percorso',
+    points: points.map(p => ({ lat: p.lat, lng: p.lng })),
+    color: '#ef4444',
+  }] : [];
+
+  const mapCenter = points.length > 0 
+    ? [points[Math.floor(points.length / 2)].lat, points[Math.floor(points.length / 2)].lng] as [number, number]
+    : undefined;
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Salva Percorso</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
+          {/* Map Preview */}
+          {points.length > 0 && (
+            <div className="space-y-2">
+              <Label>Anteprima Percorso</Label>
+              <div className="rounded-lg overflow-hidden border">
+                <MapView
+                  routes={mapRoute}
+                  height="300px"
+                  center={mapCenter}
+                  zoom={13}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                {points.length} punti tracciati • {distanceKm.toFixed(2)} km
+              </p>
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>

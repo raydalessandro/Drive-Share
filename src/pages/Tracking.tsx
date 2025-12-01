@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { useTrackingStore } from '@/stores/trackingStore';
 import { PauseDialog } from '@/components/tracking/PauseDialog';
@@ -10,6 +10,12 @@ import { Play, Pause, Square, Navigation, Gauge, Clock, MapPin } from 'lucide-re
 import { useNavigate } from 'react-router-dom';
 
 export default function Tracking() {
+  // Check if geolocation is available
+  useEffect(() => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      console.warn('Geolocation not available');
+    }
+  }, []);
   const {
     isTracking,
     isPaused,
@@ -94,8 +100,8 @@ export default function Tracking() {
             <MapView
               routes={mapRoutes}
               height="400px"
-              center={currentPosition ? [currentPosition.lat, currentPosition.lng] : undefined}
-              zoom={15}
+              center={currentPosition ? [currentPosition.lat, currentPosition.lng] : [45.4642, 9.1900]}
+              zoom={currentPosition ? 15 : 10}
             />
           </CardContent>
         </Card>

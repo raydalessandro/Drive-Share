@@ -71,6 +71,17 @@ export default function MapView({
     };
   }, [showControls]);
 
+  // Update map center when center prop changes
+  useEffect(() => {
+    if (!mapRef.current || isLoading || !center) return;
+    
+    try {
+      mapRef.current.setView(center, mapRef.current.getZoom() || 10);
+    } catch (error) {
+      console.error('Error updating map center:', error);
+    }
+  }, [center, isLoading]);
+
   // Update routes
   useEffect(() => {
     if (!mapRef.current || isLoading) return;
